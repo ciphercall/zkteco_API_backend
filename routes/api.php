@@ -2,18 +2,24 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ZKTecoController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\RegisteredUserController;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
-*/
+// Public routes for authentication
+Route::post('/register', [RegisteredUserController::class, 'store']);
+Route::post('/login', [AuthenticatedSessionController::class, 'store']);
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+// Protected routes with Sanctum authentication and rate limiting
+Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+
+    // ZKTeco device routes
+    Route::post('/device/connect', [ZKTecoController::class, 'connect']);
+    Route::get('/device/info', [ZKTecoController::class, 'getDeviceInfo']);
+    Route::get('/attendance/logs', [ZKTecoController::class, 'getAttendanceLogs']);
+    Route::delete('/attendance/logs', [ZKTecoController::class, 'clearAttendanceLogs']);
+    Route::post('/attendance/user', [ZKTecoController::class, 'setUser']);
 });
