@@ -9,6 +9,7 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 // Public routes for authentication
 Route::post('/register', [RegisteredUserController::class, 'store']);
 Route::post('/login', [AuthenticatedSessionController::class, 'store']);
+Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->middleware('auth:sanctum');
 
 // Protected routes with Sanctum authentication and rate limiting
 Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
