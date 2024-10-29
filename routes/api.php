@@ -18,9 +18,24 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     });
 
     // ZKTeco device routes
-    Route::post('/device/connect', [ZKTecoController::class, 'connect']);
-    Route::get('/device/info', [ZKTecoController::class, 'getDeviceInfo']);
+    Route::post('/device/connect', [ZKTecoController::class, 'connectDevice']);
+    Route::post('/device/disconnect', [ZKTecoController::class, 'disconnectDevice']);
+    Route::post('/device/enable', [ZKTecoController::class, 'enableDevice']);
+    Route::post('/device/disable', [ZKTecoController::class, 'disableDevice']);
+    Route::post('/device/restart', [ZKTecoController::class, 'restartDevice']);
+    Route::post('/device/shutdown', [ZKTecoController::class, 'shutdownDevice']);
+    Route::post('/device/sleep', [ZKTecoController::class, 'sleepDevice']);
+    Route::post('/device/resume', [ZKTecoController::class, 'resumeDevice']);
+    Route::get('/device/version', [ZKTecoController::class, 'getDeviceVersion']);
+    Route::get('/device/os-version', [ZKTecoController::class, 'getOSVersion']);
+    Route::get('/device/platform', [ZKTecoController::class, 'getPlatform']);
+    Route::post('/device/clear-admin', [ZKTecoController::class, 'clearAdmin']);
+    Route::delete('/device/user/{uid}', [ZKTecoController::class, 'removeUser']);
+    Route::post('/device/test-voice', [ZKTecoController::class, 'testVoice']);
+    
+    // Attendance and user routes
     Route::get('/attendance/logs', [ZKTecoController::class, 'getAttendanceLogs']);
     Route::delete('/attendance/logs', [ZKTecoController::class, 'clearAttendanceLogs']);
     Route::post('/attendance/user', [ZKTecoController::class, 'setUser']);
+    Route::get('/device/info', [ZKTecoController::class, 'getDeviceInfo']);
 });

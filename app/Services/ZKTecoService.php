@@ -15,6 +15,7 @@ class ZKTecoService
         $this->zk->connect();
     }
 
+    // Existing methods
     public function getAttendanceLogs()
     {
         return $this->zk->getAttendance();
@@ -37,5 +38,76 @@ class ZKTecoService
             'firmware_version' => $this->zk->getFirmwareVersion(),
             'device_serial' => $this->zk->getSerialNumber(),
         ];
+    }
+
+    // Additional methods from the package
+    public function connect()
+    {
+        return $this->zk->connect();
+    }
+
+    public function disconnect()
+    {
+        return $this->zk->disconnect();
+    }
+
+    public function enableDevice()
+    {
+        return $this->zk->enableDevice();
+    }
+
+    public function disableDevice()
+    {
+        return $this->zk->disableDevice();
+    }
+
+    public function restartDevice()
+    {
+        return $this->zk->restart();
+    }
+
+    public function shutdownDevice()
+    {
+        return $this->zk->shutdown();
+    }
+
+    public function sleepDevice()
+    {
+        return $this->zk->sleep();
+    }
+
+    public function resumeDevice()
+    {
+        return $this->zk->resume();
+    }
+
+    public function getDeviceVersion()
+    {
+        return $this->zk->getVersion();
+    }
+
+    public function getOSVersion()
+    {
+        return $this->zk->getOSVersion();
+    }
+
+    public function getPlatform()
+    {
+        return $this->zk->getPlatform();
+    }
+
+    public function clearAdmin()
+    {
+        return $this->zk->clearAdmin();
+    }
+
+    public function removeUser(int $uid)
+    {
+        return $this->zk->removeUser($uid);
+    }
+
+    public function testVoice()
+    {
+        return $this->zk->testVoice();
     }
 }
