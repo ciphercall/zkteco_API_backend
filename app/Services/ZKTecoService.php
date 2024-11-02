@@ -81,6 +81,12 @@ class ZKTecoService
         return $this->zk->resume();
     }
 
+    public function getUsers()
+    {
+        return $this->zk->getUser();
+    }
+
+
     public function getOSVersion()
     {
         return $this->zk->osVersion();

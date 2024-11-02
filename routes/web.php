@@ -28,3 +28,6 @@ Route::get('/device', function () {
 Route::get('/attendance-logs', function () {
     return view('attendance-logs');
 });
+Route::get('/registered-users', function () {
+    return view('registered-users');
+});

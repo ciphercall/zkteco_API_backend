@@ -103,6 +103,12 @@ class ZKTecoController extends Controller
         return response()->json(['device_resumed' => $result]);
     }
 
+    public function getUsers()
+    {
+        $result = $this->zkService->getUsers();
+        return response()->json(['Fetched Users' => $result]);
+    }
+
     public function getOSVersion()
     {
         $result = $this->zkService->getOSVersion();
