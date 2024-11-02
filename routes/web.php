@@ -25,3 +25,6 @@ Route::get('/login', function () {
 Route::get('/device', function () {
     return view('device');
 });
+Route::get('/attendance-logs', function () {
+    return view('attendance-logs');
+});
