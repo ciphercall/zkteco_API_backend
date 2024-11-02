@@ -26,13 +26,12 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::post('/device/shutdown', [ZKTecoController::class, 'shutdownDevice']);
     Route::post('/device/sleep', [ZKTecoController::class, 'sleepDevice']);
     Route::post('/device/resume', [ZKTecoController::class, 'resumeDevice']);
-    Route::get('/device/version', [ZKTecoController::class, 'getDeviceVersion']);
     Route::get('/device/os-version', [ZKTecoController::class, 'getOSVersion']);
     Route::get('/device/platform', [ZKTecoController::class, 'getPlatform']);
     Route::post('/device/clear-admin', [ZKTecoController::class, 'clearAdmin']);
     Route::delete('/device/user/{uid}', [ZKTecoController::class, 'removeUser']);
     Route::post('/device/test-voice', [ZKTecoController::class, 'testVoice']);
-    
+
     // Attendance and user routes
     Route::get('/attendance/logs', [ZKTecoController::class, 'getAttendanceLogs']);
     Route::delete('/attendance/logs', [ZKTecoController::class, 'clearAttendanceLogs']);

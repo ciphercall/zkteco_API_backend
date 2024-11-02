@@ -103,12 +103,6 @@ class ZKTecoController extends Controller
         return response()->json(['device_resumed' => $result]);
     }
 
-    public function getDeviceVersion()
-    {
-        $result = $this->zkService->getDeviceVersion();
-        return response()->json(['device_version' => $result]);
-    }
-
     public function getOSVersion()
     {
         $result = $this->zkService->getOSVersion();

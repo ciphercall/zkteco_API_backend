@@ -34,9 +34,9 @@ class ZKTecoService
     public function getDeviceInfo()
     {
         return [
-            'device_name' => $this->zk->getDeviceName(),
-            'firmware_version' => $this->zk->getFirmwareVersion(),
-            'device_serial' => $this->zk->getSerialNumber(),
+            'device_name' => $this->zk->deviceName(),
+            'firmware_version' => $this->zk->fmVersion(),
+            'device_serial' => $this->zk->serialNumber(),
         ];
     }
 
@@ -81,19 +81,14 @@ class ZKTecoService
         return $this->zk->resume();
     }
 
-    public function getDeviceVersion()
-    {
-        return $this->zk->getVersion();
-    }
-
     public function getOSVersion()
     {
-        return $this->zk->getOSVersion();
+        return $this->zk->osVersion();
     }
 
     public function getPlatform()
     {
-        return $this->zk->getPlatform();
+        return $this->zk->platform();
     }
 
     public function clearAdmin()
