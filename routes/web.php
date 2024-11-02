@@ -16,3 +16,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+Route::get('/register', function () {
+    return view('register'); // This matches the Blade file name in resources/views
+});
+Route::get('/login', function () {
+    return view('login');
+});
