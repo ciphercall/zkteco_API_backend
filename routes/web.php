@@ -31,3 +31,6 @@ Route::get('/attendance-logs', function () {
 Route::get('/registered-users', function () {
     return view('registered-users');
 });
+Route::get('/set-user', function () {
+    return view('set-user');
+});
