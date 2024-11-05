@@ -9,14 +9,10 @@ class Attendance extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'user_id',
-        'timestamp',
+        'check_in',
+        'check_out',
         'status',
     ];
 

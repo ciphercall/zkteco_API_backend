@@ -36,67 +36,90 @@ export default {
   name: 'AttendanceLogsPage',
   data() {
     return {
-      users: {}, // Store users by ID for quick lookup
+      users: {},
       attendanceLogs: [],
-      processedAttendanceLogs: [], // Processed logs with check-in and check-out times
+      processedAttendanceLogs: [],
     };
   },
   async mounted() {
-    await this.fetchUsers();
-    await this.fetchAttendanceLogs();
-    this.replaceUserIdWithName();
-    this.processLogs();
+    await this.syncAndFetchAttendanceLogs();
+    this.startAutoRefresh();
   },
   methods: {
+    async syncAndFetchAttendanceLogs() {
+      // Step 1: Fetch and process logs, save to database, and clear device logs
+      await this.fetchUsers();
+      await this.fetchAndProcessAttendanceLogs();
+      await this.clearDeviceLogs();
+      
+      // Step 2: Fetch attendance logs from the database
+      await this.fetchLogsFromDatabase();
+    },
     async fetchUsers() {
       try {
         const response = await axiosInstance.get('/device/get-users');
         const fetchedUsers = response.data["Fetched Users"];
         this.users = Object.values(fetchedUsers).reduce((acc, user) => {
-          acc[user.userid] = { name: user.name, userId: user.userid }; // Save both name and userId
+          acc[user.userid] = { name: user.name, userId: user.userid };
           return acc;
         }, {});
       } catch (error) {
         console.error('Failed to fetch users', error);
       }
     },
-    async fetchAttendanceLogs() {
+    async fetchAndProcessAttendanceLogs() {
       try {
         const response = await axiosInstance.get('/attendance/logs');
-        this.attendanceLogs = response.data;
+        const rawLogs = response.data;
+
+        const logsByDateAndUser = {};
+        rawLogs.forEach((log) => {
+          const date = new Date(log.timestamp).toISOString().split('T')[0];
+          const userKey = `${log.id}-${date}`;
+
+          if (!logsByDateAndUser[userKey]) {
+            logsByDateAndUser[userKey] = { ...log, checkIn: log.timestamp, checkOut: log.timestamp };
+          } else {
+            logsByDateAndUser[userKey].checkIn = Math.min(logsByDateAndUser[userKey].checkIn, log.timestamp);
+            logsByDateAndUser[userKey].checkOut = Math.max(logsByDateAndUser[userKey].checkOut, log.timestamp);
+          }
+        });
+
+        this.processedAttendanceLogs = Object.values(logsByDateAndUser).map((log) => ({
+          ...log,
+          userName: this.users[log.id] ? this.users[log.id].name : 'Unknown User',
+          userId: log.id,
+          checkIn: new Date(log.checkIn).toLocaleString(),
+          checkOut: new Date(log.checkOut).toLocaleString(),
+        }));
+
+        // Save processed logs to the database
+        await axiosInstance.post('/attendance/save-logs', this.processedAttendanceLogs);
       } catch (error) {
-        console.error('Failed to fetch attendance logs', error);
+        console.error('Failed to process and save attendance logs', error);
       }
     },
-    replaceUserIdWithName() {
-      this.attendanceLogs = this.attendanceLogs.map((log) => ({
-        ...log,
-        userName: this.users[log.id] ? this.users[log.id].name : 'Unknown User',
-        userId: log.id, // Retain user ID for the new column
-      }));
+    async clearDeviceLogs() {
+      try {
+        await axiosInstance.delete('/attendance/logs');
+      } catch (error) {
+        console.error('Failed to clear device logs', error);
+      }
     },
-    processLogs() {
-      const logsByDateAndUser = {};
-
-      // Organize logs by user and date
-      this.attendanceLogs.forEach((log) => {
-        const date = new Date(log.timestamp).toISOString().split('T')[0];
-        const userKey = `${log.userId}-${date}`;
-
-        if (!logsByDateAndUser[userKey]) {
-          logsByDateAndUser[userKey] = { ...log, checkIn: log.timestamp, checkOut: log.timestamp };
-        } else {
-          logsByDateAndUser[userKey].checkIn = Math.min(logsByDateAndUser[userKey].checkIn, log.timestamp);
-          logsByDateAndUser[userKey].checkOut = Math.max(logsByDateAndUser[userKey].checkOut, log.timestamp);
-        }
-      });
-
-      // Convert the logs back to an array format and format timestamps for display
-      this.processedAttendanceLogs = Object.values(logsByDateAndUser).map((log) => ({
-        ...log,
-        checkIn: new Date(log.checkIn).toLocaleString(),
-        checkOut: new Date(log.checkOut).toLocaleString(),
-      }));
+    async fetchLogsFromDatabase() {
+      try {
+        const response = await axiosInstance.get('/attendance/fetch-db-logs');
+        this.processedAttendanceLogs = response.data.map(log => ({
+          ...log,
+          checkIn: new Date(log.checkIn).toLocaleString(),
+          checkOut: new Date(log.checkOut).toLocaleString(),
+        }));
+      } catch (error) {
+        console.error('Failed to fetch logs from the database', error);
+      }
+    },
+    startAutoRefresh() {
+      setInterval(this.syncAndFetchAttendanceLogs, 300000); // 5 minutes
     },
   },
 };

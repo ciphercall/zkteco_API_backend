@@ -138,4 +138,56 @@ class ZKTecoController extends Controller
         $result = $this->zkService->testVoice();
         return response()->json(['voice_tested' => $result]);
     }
+
+    public function syncAttendanceLogs()
+    {
+        $processedLogs = $this->processAttendanceLogs();
+
+        foreach ($processedLogs as $log) {
+            Attendance::updateOrCreate(
+                [
+                    'user_id' => $log['userId'],
+                    'status' => 'present',
+                    'created_at' => $log['date'], // Ensures a unique entry for each day per user
+                ],
+                [
+                    'check_in' => $log['checkIn'],
+                    'check_out' => $log['checkOut'],
+                ]
+            );
+        }
+
+        // Clear attendance logs from the device
+        $this->zkService->clearAttendanceLogs();
+
+        return response()->json(['message' => 'Attendance logs synced successfully']);
+    }
+
+    private function processAttendanceLogs()
+    {
+        $users = $this->zkService->getUsers();
+        $attendanceLogs = $this->zkService->getAttendanceLogs();
+
+        $logsByDateAndUser = [];
+
+        foreach ($attendanceLogs as $log) {
+            $date = (new \DateTime($log['timestamp']))->format('Y-m-d');
+            $userKey = "{$log['id']}-{$date}";
+
+            if (!isset($logsByDateAndUser[$userKey])) {
+                $logsByDateAndUser[$userKey] = [
+                    'userId' => $log['id'],
+                    'userName' => $users[$log['id']]['name'] ?? 'Unknown User',
+                    'date' => $date,
+                    'checkIn' => $log['timestamp'],
+                    'checkOut' => $log['timestamp'],
+                ];
+            } else {
+                $logsByDateAndUser[$userKey]['checkIn'] = min($logsByDateAndUser[$userKey]['checkIn'], $log['timestamp']);
+                $logsByDateAndUser[$userKey]['checkOut'] = max($logsByDateAndUser[$userKey]['checkOut'], $log['timestamp']);
+            }
+        }
+
+        return array_values($logsByDateAndUser);
+    }
 }
